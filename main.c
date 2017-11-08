@@ -12,6 +12,9 @@ void parsePorts(int num, int* portArray, char* ret){
 	}
 }
 
+
+
+
 int main(int argc, char *argv[]){
 
 	/*****************************************************************************
