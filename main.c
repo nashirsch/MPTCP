@@ -1,5 +1,9 @@
 #include "mpconnect.h"
 
+
+
+
+//Parse MPOK return string into array of port ints
 void parsePorts(int num, int* portArray, char* ret){
 	ret = &ret[5];
 	portArray[0] = atoi(strtok(ret, ":"));
@@ -10,7 +14,9 @@ void parsePorts(int num, int* portArray, char* ret){
 
 int main(int argc, char *argv[]){
 
-	//checking argument spec
+	/*****************************************************************************
+	 * CHECKING ARGUMENT SPEC
+	 */
 	if(argc != 5){
 		printf("\nError: invalid number of arguments\n");
 		printf("Expected: [#Paths] [Hostname] [Port] [File]\n\n");
@@ -21,10 +27,9 @@ int main(int argc, char *argv[]){
 		exit(0);
 	}
 
-	/*
-	 *
+
+	/*****************************************************************************
 	 *SETTING UP CONNECTION TO SERVER
-	 *
 	 */
 	//getting server info
 	struct sockaddr_in* servaddr = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
@@ -48,10 +53,8 @@ int main(int argc, char *argv[]){
 	getsockname(reqsd, (struct sockaddr*) clientaddr, &socklen);
 
 
-	/*
-	 *
+	/*****************************************************************************
 	 *REQUESTING INFO FROM SERVER
-	 *
 	 */
 	//preparing request string
 	char* request = (char*)malloc(sizeof(char) * 256);
@@ -70,26 +73,27 @@ int main(int argc, char *argv[]){
 	req->header = reqhead;
 
 
-	/*
-	 *
+	/*****************************************************************************
 	 *SENDING AND RECEIVING PORT INFO, CLOSING CONNECTION
-	 *
 	 */
 	mp_send(reqsd, req, sizeof(struct mptcp_header) + strlen(request), 0);
 	mp_recv(reqsd, req, 128, 0);
 	close(reqsd);
 
+
+	/*****************************************************************************
+	 * PARSING PORTS, ESTAB. CONNECTIONS, READ FILE
+	 */
 	//getting int array of ports
 	int ports[atoi(argv[1])];
 	parsePorts(atoi(argv[1]), ports, req->data);
-
-	//passing ports to connect function
+	//giving ports to connect function
 	pathHolder* ph = connectPorts(ports,
 		               							atoi(argv[1]),
 							     							servaddr->sin_addr.s_addr,
 							     							clientaddr->sin_addr.s_addr);
 
-	//load file, call sender function
+  //reading file to send
 	FILE* fp;
 	char* buf = (char*)malloc(sizeof(char) * (1 << 19));
 	char* temp = (char*)malloc(sizeof(char) * 1024);
@@ -100,6 +104,14 @@ int main(int argc, char *argv[]){
 	while(fgets(temp, 1024, fp)){
 		strcat(buf, temp);
 	}
+
+
+	/*****************************************************************************
+	 * INITIATING DATA TRANSFER
+	 */
+	sendFile(ph, buf);
+
+
 
 	return(0);
 }
