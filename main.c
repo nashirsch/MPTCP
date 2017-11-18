@@ -10,6 +10,7 @@ void parsePorts(int num, int* portArray, char* ret){
 	for(int i = 1; i < num; i++){
 		portArray[i] = atoi(strtok(NULL, ":"));
 	}
+
 }
 
 
@@ -96,7 +97,7 @@ int main(int argc, char *argv[]){
 							     							servaddr->sin_addr.s_addr,
 							     							clientaddr->sin_addr.s_addr);
 
-  //reading file to send
+  	//reading file to send
 	FILE* fp;
 	char* buf = (char*)malloc(sizeof(char) * (1 << 19));
 	char* temp = (char*)malloc(sizeof(char) * 1024);
@@ -112,9 +113,11 @@ int main(int argc, char *argv[]){
 	/*****************************************************************************
 	 * INITIATING DATA TRANSFER
 	 */
-	sendFile(ph, buf);
+	if(sendFile(ph, buf)){
+		fprintf(stdout, "File transfer complete\n");
+	}
 
-
+	closePorts(ph);
 
 	return(0);
 }
