@@ -19,7 +19,6 @@ int connThread(pathHolder* ph, conn* cn, char* data){
   comms->header->seq_num = 1;
   comms->header->ack_num = 1;
   comms->header->total_bytes = strlen(data);
-  printf("%d\n", comms->header->total_bytes);
 
   int i = 20;
   while(i > 0){
@@ -28,31 +27,34 @@ int connThread(pathHolder* ph, conn* cn, char* data){
     if(ph->unacked < RWIN){
       if(cn->packsOut < cn->cwnd){
 
-        printf("SENT PACKET\n");
         printf("\tData Index %d\n", ph->dataIndex);
+        printf("\t\tMYPID %d\n", getpid());
 
+        //find the maximum size we can send given the three contraints:
+        //    1) cant send more than 84 bytes in a segment
+        //    2) cant send more than RWIN - unacknowledged bytes, with room for header
+        //    3) cant send more than the amount of data left to transfer
         size = min(min(BUFSIZE, RWIN - ph->unacked - sizeof(struct mptcp_header)), strlen(data) - ph->dataIndex);
-        cn->packsOut++;
-        ph->unacked += size + sizeof(struct mptcp_header);
 
+        //clear and copy data into buffer
         memset(comms->data, 0, BUFSIZE);
         strncpy(comms->data, &data[ph->dataIndex], size);
 
+        //return ack to 1, and the seq to the current data index + 1
         comms->header->ack_num = 1;
         comms->header->seq_num = ph->dataIndex + 1;
-        ph->dataIndex += size;
 
-        printf("\tUnacked bytes %d\n", ph->unacked);
-        printf("\tUnacked packets %d\n", cn->packsOut);
-        printf("\tcwnd %d\n", cn->cwnd);
-        printf("\tlast recieved ack %d\n", cn->lastAck);
-        printf("\tData send %d\n", size);
-        printf("\t\tsent seq number %d\n", comms->header->seq_num);
+        ph->unacked += size + sizeof(struct mptcp_header); //update unacked bytes on all paths
+        ph->dataIndex += size; //update current data position
+        cn->packsOut++; //update number of unacked packets on this path
+
+        //swap address information on I/O packet, and reset the amount of data
         comms->header->dest_addr = *cn->servaddr;
         comms->header->src_addr = *cn->clientaddr;
         comms->header->total_bytes = strlen(data);
-        senddata(cn, comms, size);
 
+        //unlock mutex here
+        senddata(cn, comms, size);
       }
     }
 

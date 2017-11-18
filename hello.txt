@@ -38,5 +38,4 @@ hey there
 my name is noah and im doing a networks project
 goodbye
 hey there
-my name is noah and im doing a networks project
-goodbye
+my name is noah
