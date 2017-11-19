@@ -22,11 +22,12 @@ pathHolder* connectPorts(int* ports, int num, in_addr_t servIP, in_addr_t myIP){
   allPaths->conns = (conn*)malloc(sizeof(conn) * num);
   allPaths->unacked = 0;
   allPaths->dataIndex = 0;
+  allPaths->success = 0;
+
 
   //for each returned port:
-
   int i = 0;
-  for(conn* c = &allPaths->conns[0]; i < num; c = &allPaths->conns[i], i++) {
+  for(conn* c = &allPaths->conns[0]; i < num; c = &allPaths->conns[i]) {
 
     //put server info in current connection struct
     c->servaddr = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
@@ -68,6 +69,7 @@ pathHolder* connectPorts(int* ports, int num, in_addr_t servIP, in_addr_t myIP){
     c->currentAcks = 0;
     c->congestionMode = exponential;
 
+    i++;
   }
 
   return(allPaths);

@@ -17,6 +17,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <limits.h>
+#include <pthread.h>
 #include "mptcp.h"
 
 //struct to keep track of a single connection
@@ -48,12 +49,26 @@ typedef struct pathHolder{
 
   int unacked;
   int dataIndex;
+  int success;
+
+  pthread_mutex_t lock;
 
 } pathHolder;
 
+typedef struct threadInfo{
+
+  pathHolder* ph;
+  conn* cn;
+  char* data;
+
+  struct sockaddr_in* clientaddr;
+  struct sockaddr_in* servaddr;
+
+} threadInfo;
+
 int senddata(conn* cn, struct packet* pack, int len);
 
-int connThread(pathHolder* ph, conn* cn, char* data);
+void* connThread(void* TI);
 
 bool sendFile(pathHolder* ph, char* data);
 

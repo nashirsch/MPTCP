@@ -109,6 +109,14 @@ int main(int argc, char *argv[]){
 		strcat(buf, temp);
 	}
 
+	/*****************************************************************************
+	 * INITIALIZING MULTI-THREAD SENDING LOCK
+	 */
+	if(pthread_mutex_init(&(ph->lock), NULL) != 0){
+     printf("Error: mutex init failed\n");
+     exit(0);
+  }
+
 
 	/*****************************************************************************
 	 * INITIATING DATA TRANSFER
@@ -117,6 +125,7 @@ int main(int argc, char *argv[]){
 		fprintf(stdout, "File transfer complete\n");
 	}
 
+	pthread_mutex_destroy(&(ph->lock));
 	closePorts(ph);
 
 	return(0);
