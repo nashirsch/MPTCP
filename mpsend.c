@@ -7,6 +7,39 @@ int senddata(conn* cn, struct packet* pack, int len){
 
 }
 
+int retransmit(pathHolder* ph, int ind, int seqNum, int size, char* data){
+
+  int resendPath = ((int) pow(ind*5, 3)) % ((int) ph->numConns);
+  if(resendPath == ind){
+    if(ph->numConns != 1){
+      if(resendPath > 0){
+        resendPath--;
+      }
+      else{
+        resendPath++;
+      }
+    }
+  }
+
+  struct packet* comms = (struct packet*) malloc(sizeof(struct packet));
+  comms->data = (char*) malloc(sizeof(char) * BUFSIZE);
+  comms->header = (struct mptcp_header*) malloc(sizeof(struct mptcp_header));
+  comms->header->dest_addr = *(ph->conns[ind].servaddr);
+  comms->header->src_addr = *(ph->conns[ind].clientaddr);
+  comms->header->seq_num = seqNum;
+  comms->header->ack_num = 1;
+  comms->header->total_bytes = strlen(data);
+
+  strncpy(comms->data, &data[seqNum - 1], size);
+  int sent = senddata(&ph->conns[resendPath], comms, size);
+
+  free(comms->header);
+  free(comms);
+
+  return(sent);
+
+}
+
 void* connThread(void* TI){
 
 
@@ -18,8 +51,9 @@ void* connThread(void* TI){
   struct sockaddr_in* clientaddr = tInfo->clientaddr;
   struct sockaddr_in* servaddr = tInfo->servaddr;
 
-
   int size = 0;
+  qnode* iterator;
+  qnode* temp;
 
   struct packet* comms = (struct packet*) malloc(sizeof(struct packet));
   comms->data = (char*) malloc(sizeof(char) * BUFSIZE);
@@ -31,9 +65,7 @@ void* connThread(void* TI){
   comms->header->total_bytes = strlen(data);
 
 
-  int i = 10;
-  while(i > 0){
-    i--;
+  while(true){
 
     if(ph->success == 1){
       pthread_exit(NULL);
@@ -42,8 +74,8 @@ void* connThread(void* TI){
     pthread_mutex_lock(&ph->lock);
     if(ph->unacked < RWIN){
       if(cn->packsOut < cn->cwnd){
-        printf("\tData Index %d\n", ph->dataIndex);
-        printf("\t\tMYPID %d\n", (int) pthread_self());
+        printf("MYPID %d\n", (int) pthread_self());
+        printf("\t\tData Index %d\n", ph->dataIndex);
 
         //find the maximum size we can send given the three contraints:
         //    1) cant send more than 84 bytes in a segment
@@ -67,6 +99,18 @@ void* connThread(void* TI){
         comms->header->total_bytes = strlen(data);
 
         senddata(cn, comms, size);
+
+        qnode* newAck = (qnode*) malloc(sizeof(qnode));
+        newAck->size = size;
+        newAck->seqNum = comms->header->seq_num;
+        newAck->next = NULL;
+
+        iterator = cn->packets->root;
+        while(iterator->next != NULL)
+          iterator = iterator->next;
+
+        iterator->next = newAck;
+
       }
     }
     pthread_mutex_unlock(&ph->lock);
@@ -74,18 +118,64 @@ void* connThread(void* TI){
     if(mp_recv(cn->sd, comms, MSS, MSG_DONTWAIT) == -1){
       continue;
     }
-    else{
+    else{ //if a message was recieved:
       if(comms->header->ack_num == -1){
-        printf("FILETRANSFERCOMPLETE\n");
         ph->success = 1;
         pthread_exit(NULL); //file transfer complete
       }
 
-      //CHECK AND HANDLE LOSS HERE
-      ph->unacked -= (comms->header->ack_num - cn->lastAck); //not true in case of loss
-      cn->lastAck = comms->header->ack_num;
-      cn->packsOut--;
-      cn->currentAcks++;
+      printf("MYPID %d\n", (int) pthread_self());
+      printf("\t\tRecieved ack %d\n", comms->header->ack_num);
+
+      iterator = cn->packets->root->next; //iterator into the sent queue
+
+      //if the ack does not match the data after the queue's root (oldest packet)
+      if((iterator->seqNum + iterator->size) != comms->header->ack_num){
+
+        //reset the window and ssthresh
+        cn->ssthresh = max(1, cn->cwnd/2);
+        cn->cwnd = 1;
+        cn->currentAcks = 0;
+
+        //if asking for root, first dup ack. retransmitting root, can remove
+        if(iterator->seqNum == comms->header->ack_num){
+
+          printf("MYPID %d\n", (int) pthread_self());
+          printf("\t\tRETRANSMITTING %d\n", comms->header->ack_num);
+          retransmit(ph, cn->index, iterator->seqNum, iterator->size, data);
+
+          cn->packsOut--;
+          ph->unacked -= (iterator->size + sizeof(struct mptcp_header));
+
+          temp = iterator;
+          cn->packets->root->next = iterator->next;
+          free(temp);
+          printf("1\n");
+        }
+
+
+        //for each dup ack, remove a node as it was confirmed recieved
+        iterator = cn->packets->root->next;
+        printf("1.1\n");
+        cn->packsOut--;
+        printf("1.2\n");
+        ph->unacked -= (iterator->size + sizeof(struct mptcp_header));
+        printf("1.3\n");
+        cn->packets->root->next = iterator->next;
+        printf("1.5\n");
+        free(iterator);
+        printf("2\n");
+
+      }
+      else{
+        iterator = cn->packets->root->next;
+        ph->unacked -= (iterator->size + sizeof(struct mptcp_header));
+        cn->packsOut--;
+        cn->currentAcks++;
+        cn->packets->root->next = iterator->next;
+        free(iterator);
+        printf("3\n");
+      }
 
     }
 
@@ -99,6 +189,11 @@ void* connThread(void* TI){
         cn->currentAcks = 0;
       }
     }
+
+    if(cn->cwnd >= cn->ssthresh){
+      cn->congestionMode = additive;
+    }
+
   }
   pthread_exit(NULL);
 }
@@ -106,8 +201,6 @@ void* connThread(void* TI){
 
 bool sendFile(pathHolder* ph, char* data){
 
-  //int PIDs[ph->numConns];
-  //int pid;
 
   pthread_t PIDs[ph->numConns];
   threadInfo* args[ph->numConns];
@@ -131,36 +224,6 @@ bool sendFile(pathHolder* ph, char* data){
   for(int j = 0; j < ph->numConns; j++){
     pthread_join(PIDs[j], NULL);
   }
-
-  /*
-  for(int i = 0; i < ph->numConns; i++) {
-    printf("%d\n", i);
-    if((pid = fork()) == 0){
-      if(connThread(ph, &ph->conns[i], data) == -1){
-        for(int j = 0; j < ph->numConns; j++){
-          if(i != j){
-            kill(PIDs[j], SIGKILL);
-          }
-        }
-        exit(0);
-        //close connections
-      }
-    }
-
-    else{
-      printf("%d %d\n", i, pid);
-      PIDs[i] = pid;
-    }
-
-  }
-
-
-  while (waitpid(-1, NULL, 0)) {
-    if (errno == ECHILD) {
-      return(true);
-    }
-  }
-  */
 
   if(ph->success == 1){
     return(true);

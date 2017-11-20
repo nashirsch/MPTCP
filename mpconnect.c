@@ -49,7 +49,7 @@ pathHolder* connectPorts(int* ports, int num, in_addr_t servIP, in_addr_t myIP){
     if(mp_connect(c->sd,
                   (struct sockaddr*) c->servaddr,
                   16) != 0){
-  		printf("Error estblishing connection on port index %d\n", i);
+  		printf("Error establishing connection on port index %d\n", i);
   		exit(0);
   	}
     //socket successfully connected!
@@ -68,6 +68,13 @@ pathHolder* connectPorts(int* ports, int num, in_addr_t servIP, in_addr_t myIP){
     c->packsOut = 0;
     c->currentAcks = 0;
     c->congestionMode = exponential;
+    c->index = i;
+
+    c->packets = (queue*) malloc(sizeof(queue));
+    c->packets->root = (qnode*) malloc(sizeof(qnode));
+    c->packets->root->seqNum = -1;
+    c->packets->root->size = -1;
+    c->packets->root->next = NULL;
 
     i++;
   }

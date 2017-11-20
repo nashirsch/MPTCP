@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -20,9 +21,25 @@
 #include <pthread.h>
 #include "mptcp.h"
 
+typedef struct queueNode{
+
+  struct queueNode* next;
+
+  int seqNum;
+  int size;
+
+} qnode;
+
+typedef struct queue{
+
+  struct queueNode* root;
+
+} queue;
+
 //struct to keep track of a single connection
 typedef struct connection{
 
+  int index;
   int sd;
   int lastAck; //last ack received
   int lastSeq; //number (not ind) of what to send next
@@ -31,6 +48,8 @@ typedef struct connection{
   int cwnd;
   int packsOut; //unacked packets
   int currentAcks; //successful acks for current window
+  queue* packets;
+
 
   struct sockaddr_in* clientaddr;
   struct sockaddr_in* servaddr;
@@ -67,6 +86,8 @@ typedef struct threadInfo{
 } threadInfo;
 
 int senddata(conn* cn, struct packet* pack, int len);
+
+int retransmit(pathHolder* ph, int ind, int seqNum, int size, char* data);
 
 void* connThread(void* TI);
 
