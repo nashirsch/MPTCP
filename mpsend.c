@@ -32,6 +32,7 @@ int retransmit(pathHolder* ph, int ind, int seqNum, int size, char* data){
 
   strncpy(comms->data, &data[seqNum - 1], size);
   int sent = senddata(&ph->conns[resendPath], comms, size);
+  printf("retransed %d\n", seqNum);
 
   free(comms->header);
   free(comms);
@@ -53,7 +54,6 @@ void* connThread(void* TI){
 
   int size = 0;
   qnode* iterator;
-  qnode* temp;
 
   struct packet* comms = (struct packet*) malloc(sizeof(struct packet));
   comms->data = (char*) malloc(sizeof(char) * BUFSIZE);
@@ -74,8 +74,7 @@ void* connThread(void* TI){
     pthread_mutex_lock(&ph->lock);
     if(ph->unacked < RWIN){
       if(cn->packsOut < cn->cwnd){
-        printf("MYPID %d\n", (int) pthread_self());
-        printf("\t\tData Index %d\n", ph->dataIndex);
+        printf("MYPID %d     Data Index %d\n", (int) pthread_self(), ph->dataIndex);
 
         //find the maximum size we can send given the three contraints:
         //    1) cant send more than 84 bytes in a segment
@@ -124,47 +123,38 @@ void* connThread(void* TI){
         pthread_exit(NULL); //file transfer complete
       }
 
-      printf("MYPID %d\n", (int) pthread_self());
-      printf("\t\tRecieved ack %d\n", comms->header->ack_num);
+      printf("MYPID %d    Recieved ack %d\n", (int) pthread_self(), comms->header->ack_num);
+
+      printf("%d\t current list: \n", (int) pthread_self());
+      qnode*  qn = cn->packets->root->next;
+      while(qn != NULL){
+        printf("%d\t\t %d \n", (int) pthread_self(), qn->seqNum);
+        qn = qn->next;
+      }
 
       iterator = cn->packets->root->next; //iterator into the sent queue
 
       //if the ack does not match the data after the queue's root (oldest packet)
-      if((iterator->seqNum + iterator->size) != comms->header->ack_num){
+      if((iterator->seqNum + iterator->size) > comms->header->ack_num){
 
         //reset the window and ssthresh
         cn->ssthresh = max(1, cn->cwnd/2);
         cn->cwnd = 1;
         cn->currentAcks = 0;
 
-        //if asking for root, first dup ack. retransmitting root, can remove
+        //if dup ack is root, came from this subflow. retransmit
         if(iterator->seqNum == comms->header->ack_num){
+          retransmit(ph, cn->index, comms->header->ack_num, BUFSIZE, data);
+          printf("%d RETRANSMITTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! %d, %d\n",(int) pthread_self(), comms->header->ack_num, iterator->seqNum);
+        }
 
-          printf("MYPID %d\n", (int) pthread_self());
-          printf("\t\tRETRANSMITTING %d\n", comms->header->ack_num);
-          retransmit(ph, cn->index, iterator->seqNum, iterator->size, data);
+        //if dup ack isnt root, sent on other subflow. this subflow's packet recieved, so free
 
           cn->packsOut--;
           ph->unacked -= (iterator->size + sizeof(struct mptcp_header));
-
-          temp = iterator;
           cn->packets->root->next = iterator->next;
-          free(temp);
-          printf("1\n");
-        }
+          free(iterator);
 
-
-        //for each dup ack, remove a node as it was confirmed recieved
-        iterator = cn->packets->root->next;
-        printf("1.1\n");
-        cn->packsOut--;
-        printf("1.2\n");
-        ph->unacked -= (iterator->size + sizeof(struct mptcp_header));
-        printf("1.3\n");
-        cn->packets->root->next = iterator->next;
-        printf("1.5\n");
-        free(iterator);
-        printf("2\n");
 
       }
       else{
@@ -174,7 +164,6 @@ void* connThread(void* TI){
         cn->currentAcks++;
         cn->packets->root->next = iterator->next;
         free(iterator);
-        printf("3\n");
       }
 
     }

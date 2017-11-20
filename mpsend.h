@@ -48,6 +48,7 @@ typedef struct connection{
   int cwnd;
   int packsOut; //unacked packets
   int currentAcks; //successful acks for current window
+
   queue* packets;
 
 
