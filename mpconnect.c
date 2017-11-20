@@ -1,6 +1,7 @@
 #include "mpconnect.h"
 
 
+//Goes through each connection and closes it
 void closePorts(pathHolder* ph){
 
   for(int i = 0; i < ph->numConns; i++)
@@ -11,7 +12,7 @@ void closePorts(pathHolder* ph){
 }
 
 
-//connects ports, puts them within a pathHolder struct for main to handle
+//Connects ports, puts them within a pathHolder struct for main to handle
 pathHolder* connectPorts(int* ports, int num, in_addr_t servIP, in_addr_t myIP){
 
   //establish path manager struct
@@ -61,8 +62,6 @@ pathHolder* connectPorts(int* ports, int num, in_addr_t servIP, in_addr_t myIP){
   	getsockname(c->sd, (struct sockaddr*) c->clientaddr, &len);
 
     //setting initial connection information
-    c->lastAck = 1;
-    c->lastSeq = 1;
     c->ssthresh = INT_MAX;
     c->cwnd = 1;
     c->packsOut = 0;
@@ -70,6 +69,7 @@ pathHolder* connectPorts(int* ports, int num, in_addr_t servIP, in_addr_t myIP){
     c->congestionMode = exponential;
     c->index = i;
 
+    //setup the queue of unacked packets for packet loss recognition
     c->packets = (queue*) malloc(sizeof(queue));
     c->packets->root = (qnode*) malloc(sizeof(qnode));
     c->packets->root->seqNum = -1;

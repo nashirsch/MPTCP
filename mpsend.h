@@ -21,6 +21,7 @@
 #include <pthread.h>
 #include "mptcp.h"
 
+//Node for the queue struct
 typedef struct queueNode{
 
   struct queueNode* next;
@@ -30,51 +31,55 @@ typedef struct queueNode{
 
 } qnode;
 
+//Queue struct to contain unacked packets for a given connection
 typedef struct queue{
 
   struct queueNode* root;
 
 } queue;
 
-//struct to keep track of a single connection
+//Struct to keep track of a single connection
 typedef struct connection{
 
-  int index;
-  int sd;
-  int lastAck; //last ack received
-  int lastSeq; //number (not ind) of what to send next
+  int index; //index of this connection in the pathHolder
+  int sd; //socket descriptor
 
-  int ssthresh;
-  int cwnd;
-  int packsOut; //unacked packets
-  int currentAcks; //successful acks for current window
+  int ssthresh; //guess about the throughput knee, for congestion control
+  int cwnd; //current congestion window
+  int packsOut; //current unacked packets
+  int currentAcks; //successful acks for current congestion window
 
-  queue* packets;
-
+  queue* packets; //queue of currently unacked packets
 
   struct sockaddr_in* clientaddr;
   struct sockaddr_in* servaddr;
 
+  /*
+   * Congestion Control Mode: How cwnd changes as packets are acked
+   * exponential: when cwnd packets are successfully acked, the cwnd doubles
+   * additive: when cwnd packets are successfully acked, cwnd++
+   */
   enum {exponential, additive} congestionMode;
 
 } conn;
 
-//struct to manage all connections
+//Struct to manage all connections
 typedef struct pathHolder{
 
-  int numConns;
-  conn* conns;
-  in_addr_t myIP;
-  in_addr_t servIP;
+  int numConns; //number of connections for this pathholder
+  conn* conns; //array of connections
+  in_addr_t myIP; //this machine's IP
+  in_addr_t servIP; //the server's IP
 
-  int unacked;
-  int dataIndex;
-  int success;
+  int unacked; //total unacked BYTES
+  int dataIndex; //current index at which connections are sending
+  int success; //changes to 1 when file transfer complete, to notify all threads
 
-  pthread_mutex_t lock;
+  pthread_mutex_t lock; //used to ensure multiple threads arent sending simultaneously
 
 } pathHolder;
 
+//Used to pass arguments to connections when pthread_create is called
 typedef struct threadInfo{
 
   pathHolder* ph;
@@ -86,12 +91,25 @@ typedef struct threadInfo{
 
 } threadInfo;
 
+//Sends the given packet on the given connection
+//Packet data is of length len
 int senddata(conn* cn, struct packet* pack, int len);
 
+//Retransmit function for a dropped packet
+//Arguments:
+//  ph - pathholder of all connections
+//  ind - index of path to avoid (path on which packet was originally sent)
+//  seqNum - sequence number into the data where the resent data begins
+//  size - length of data to send in packet
+//  data - pointer to string to transmit
+//Return:
+//  # of bytes sent
 int retransmit(pathHolder* ph, int ind, int seqNum, int size, char* data);
 
+//Central function that controls sending and recieving for a given connection
 void* connThread(void* TI);
 
+//Creates threads for each conn and calls connThread
 bool sendFile(pathHolder* ph, char* data);
 
 #endif

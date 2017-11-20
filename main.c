@@ -2,8 +2,7 @@
 
 
 
-
-//Parse MPOK return string into array of port ints
+//Parse MPOK return string into an array of port ints
 void parsePorts(int num, int* portArray, char* ret){
 	ret = &ret[5];
 	portArray[0] = atoi(strtok(ret, ":"));
@@ -122,11 +121,16 @@ int main(int argc, char *argv[]){
 	 * INITIATING DATA TRANSFER
 	 */
 	if(sendFile(ph, buf)){
-		fprintf(stdout, "File transfer complete\n");
+		fprintf(stdout, "\nFile transfer complete\n");
+	}
+	else{
+		fprintf(stdout, "\nFile transfer error\n");
 	}
 
+	/*****************************************************************************
+	 * DESTROY MUTEX AND CLOSE ALL PORTS, THEN RETURN
+	 */
 	pthread_mutex_destroy(&(ph->lock));
 	closePorts(ph);
-
 	return(0);
 }
