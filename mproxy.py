@@ -12,12 +12,15 @@ class thread(threading.Thread):
         self.server = server
         self.request = request
         pass
-    def run(self):
 
+    def run(self):
         self.server.send(self.request)
 
         ret = self.server.recv(1024)
+
+        print('1')
         print(ret)
+        print('2')
         self.client.send(ret)
 
 
@@ -45,10 +48,6 @@ def main(args):
         request = client[0].recv(1024)
 
 
-        print(request)
-
-
-
         requestedServer = (str(request).split(' ')[1].split(':')[0],
                            int(str(request).split(' ')[1].split(':')[1]))
         server = [i[0] for i in currentServers if i[1] is requestedServer]
@@ -69,6 +68,7 @@ def main(args):
                 exit()
 
         if threading.activeCount() <= args.numworkers:
+            print('threading')
             threadTemp = thread(client[0], server, request)
             threadTemp.start()
 
