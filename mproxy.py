@@ -17,6 +17,7 @@ def requestHandler(client, server, request):
             client.send(ret)
 
             if len(ret) == 0:
+                print("breaking")
                 break
 
 
@@ -74,6 +75,7 @@ def main(args):
             t = threading.Thread(target = requestHandler, args = (client[0], server, request))
             t.start()
 
+    print("closing")
     client[0].close()
 
 
