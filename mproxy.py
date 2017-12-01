@@ -14,6 +14,8 @@ class thread(threading.Thread):
         pass
 
     def run(self):
+
+        print(self.request)
         self.server.send(self.request)
 
         while True:
