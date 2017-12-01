@@ -42,7 +42,7 @@ def requestHandler(client):
 
             print(len(ret))
 
-            client.send(ret)
+            client[0].send(ret)
 
             ret = server.recv(1024)
 
