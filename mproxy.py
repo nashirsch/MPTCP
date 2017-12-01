@@ -10,6 +10,7 @@ def requestHandler(client, server, request):
         server.send(request)
 
         while True:
+            print("recieving packet")
             ret = server.recv(8192)
             print(ret)
             client.send(ret)
