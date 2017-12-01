@@ -43,6 +43,10 @@ def main(args):
         if str(request)[2:9] != "CONNECT":
 
             requestedServer = (str(request).split(' ')[1].split(':')[1].replace("/", ""), 80)
+            try:
+                requestedServer[1] = str(request).split(' ')[1].split(':')[2]
+            except:
+                pass
 
             print(request)
             print(requestedServer)
