@@ -25,6 +25,8 @@ def requestHandler(client, server, request):
 
 def main(args):
 
+
+    server = 0
     currentServers = []
     print("Proxy Server's IP:Port  -> ", socket.gethostbyname(socket.gethostname()) , ":", args.port)
 
@@ -49,8 +51,6 @@ def main(args):
 
             print(requestedServer)
 
-            server = 0
-
             if (requestedServer not in serv[1] for serv in currentServers):
 
                 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -66,11 +66,9 @@ def main(args):
             else:
                 server = [i[0] for i in currentServers if i[1] is requestedServer]
 
-        print("1")
-        if threading.activeCount() <= args.numworkers:
-            print("2")
-            t = threading.Thread(target = requestHandler, args = (client[0], server, request))
-            t.start()
+            if threading.activeCount() <= args.numworkers:
+                t = threading.Thread(target = requestHandler, args = (client[0], server, request))
+                t.start()
 
         request = client[0].recv(1024)
 
