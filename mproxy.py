@@ -25,7 +25,7 @@ class thread(threading.Thread):
 
 def main(args):
 
-
+    server = None
     currentServers = []
     print("Proxy Server's IP:Port  -> ", socket.gethostbyname(socket.gethostname()) , ":", args.port)
 
