@@ -52,7 +52,7 @@ def main(args):
         server = [i[0] for i in currentServers if i[1] is requestedServer]
 
         if (requestedServer not in server[1] for server in currentServers):
-            if request[2:9] == "CONNECT":
+            if str(request)[2:9] == "CONNECT":
                 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 server.connect(requestedServer)
 
@@ -63,7 +63,6 @@ def main(args):
 
                 currentServers.append((server, requestedServer))
             else:
-                print(str(request)[2:9])
                 print("Error: Non-connect method on unconnected server")
                 exit()
 
