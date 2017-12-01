@@ -33,6 +33,7 @@ def main(args):
 
 
     client = clientSocket.accept()
+    client[0].settimeout(None)
     client[0].setblocking(1)
 
     i = 100
