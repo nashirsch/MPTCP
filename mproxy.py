@@ -5,29 +5,17 @@ import threading
 import http.server
 
 
-class thread(threading.Thread):
-    def __init__(self, client, server, request):
-        threading.Thread.__init__(self)
-        self.client = client
-        self.server = server
-        self.request = request
-        pass
-
-    def run(self):
-
-        print(self.request)
-        self.server.send(self.request)
+def requestHandler(client, server, request):
+        print(request)
+        server.send(request)
 
         while True:
-            ret = self.server.recv(8192)
+            ret = server.recv(8192)
             print(ret)
-            self.client.send(ret)
+            client.send(ret)
 
             if len(ret) == 0:
                 break
-
-
-
 
 
 def main(args):
@@ -56,8 +44,8 @@ def main(args):
 
         print(request)
 
-        requestedServer = (socket.gethostbyname(str(request).split(' ')[1].split(':')[0]),
-                           str(request).split(' ')[1].split(':')[1])
+        requestedServer = (str(request).split(' ')[1].split(':')[0],
+                           int(str(request).split(' ')[1].split(':')[1]))
 
         print(requestedServer)
 
@@ -79,9 +67,7 @@ def main(args):
                 exit()
 
         if threading.activeCount() <= args.numworkers:
-            threadTemp = thread(client[0], server, request)
-            threadTemp.start()
-
+            threading.Thread(client[0], server, request)
 
     client[0].close()
 
