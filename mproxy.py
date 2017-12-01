@@ -12,8 +12,8 @@ class thread(threading.Thread):
         self.request = request
         pass
     def run(self):
-        print(this.client)
-        print(this.server)
+        print(self.client)
+        print(self.server)
         self.server.send(self.request)
 
         ret = self.server.recv(1024)
