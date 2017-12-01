@@ -42,9 +42,7 @@ def main(args):
 
         request = str(client[0].recv(1024))
 
-        print("1")
         print(request)
-        print("2")
 
         if len(request) < 4:
             continue;
