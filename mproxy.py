@@ -54,9 +54,9 @@ def main(args):
 
         print(request)
 
-        requestedServer = (str(request).split(' ')[1].split(':')[0],
+        requestedServer = (gethostbyname(str(request).split(' ')[1].split(':')[0]),
                            int(str(request).split(' ')[1].split(':')[1]))
-        print(requestedServer)
+
         server = [i[0] for i in currentServers if i[1] is requestedServer]
 
         if (requestedServer not in server[1] for server in currentServers):
