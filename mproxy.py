@@ -43,29 +43,28 @@ def main(args):
 
         print(request)
 
-        requestedServer = (str(request).split(' ')[1].split(':')[0].replace("/", "").replace("http://", "www."),
-                           int(str(request).split(' ')[1].split(':')[1]))
+        if str(request)[2:9] != "CONNECT":
 
-        print(requestedServer)
+            requestedServer = (str(request).split(' ')[1].split(':')[1].replace("/", ""), 80)
 
-        server = [i[0] for i in currentServers if i[1] is requestedServer]
+            print(requestedServer)
 
-        if (requestedServer not in server[1] for server in currentServers):
-            if str(request)[2:9] == "CONNECT":
+            server = 0
+
+            if (requestedServer not in serv[1] for serv in currentServers):
+
                 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 server.connect(requestedServer)
 
                 if(args.timeout > 0):
-                    server.setblocking(1)
                     server.settimeout(args.timeout)
                 else:
-                    server.setblocking(1)
                     server.settimeout(None)
 
                 currentServers.append((server, requestedServer))
+
             else:
-                print("Error: Non-connect method on unconnected server")
-                exit()
+                server = [i[0] for i in currentServers if i[1] is requestedServer]
 
         print("1")
         if threading.activeCount() <= args.numworkers:
