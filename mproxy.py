@@ -54,7 +54,7 @@ def main(args):
 
         print(request)
 
-        requestedServer = (gethostbyname(str(request).split(' ')[1].split(':')[0]),
+        requestedServer = (socket.gethostbyname(str(request).split(' ')[1].split(':')[0]),
                            int(str(request).split(' ')[1].split(':')[1]))
 
         server = [i[0] for i in currentServers if i[1] is requestedServer]
