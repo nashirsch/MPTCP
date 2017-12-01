@@ -6,8 +6,7 @@ import http.server
 
 
 def requestHandler(client, server, request):
-        print(3)
-        print(request)
+    
         server.send(request)
 
         ret = server.recv(1024)
