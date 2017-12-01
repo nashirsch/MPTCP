@@ -56,7 +56,7 @@ def main(args):
         client = clientSocket.accept()
 
         if threading.activeCount() <= args.numworkers:
-            t = threading.Thread(target = requestHandler, args = (client))
+            t = threading.Thread(target = requestHandler, args = (client,))
             t.start()
 
 
