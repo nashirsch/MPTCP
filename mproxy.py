@@ -10,6 +10,7 @@ def requestHandler(client):
         client[0].settimeout(None)
 
         request = client[0].recv(1024)
+        print(request)
 
         requestedServer = (str(request).split(' ')[1].split(':')[1].replace("/", ""), 80)
         try:
