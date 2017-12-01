@@ -33,6 +33,8 @@ def requestHandler(client):
         else:
             server.settimeout(None)
 
+        server.send(request)
+
         ret = server.recv(1024)
         print("recieved initial server information")
         while len(ret) > 0:
@@ -41,8 +43,6 @@ def requestHandler(client):
             print(len(ret))
 
             client.send(ret)
-
-            ret = None
 
             ret = server.recv(1024)
 
