@@ -40,6 +40,7 @@ def main(args):
     i = 10
     while i > 0:
         i -= 1
+        print("im back")
         request = client[0].recv(1024)
 
         print(request)
