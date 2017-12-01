@@ -42,6 +42,8 @@ def requestHandler(client):
 
             client.send(ret)
 
+            ret = None
+
             ret = server.recv(1024)
 
         client[0].close()
