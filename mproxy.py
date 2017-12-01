@@ -18,9 +18,8 @@ class thread(threading.Thread):
 
         ret = self.server.recv(1024)
 
-        print('1')
         print(ret)
-        print('2')
+
         self.client.send(ret)
 
 
@@ -65,7 +64,6 @@ def main(args):
                     server.settimeout(args.timeout)
                 else:
                     server.settimeout(None)
-                    print("BLOCKING ON")
 
                 currentServers.append((server, requestedServer))
             else:
@@ -73,7 +71,6 @@ def main(args):
                 exit()
 
         if threading.activeCount() <= args.numworkers:
-            print('threading')
             threadTemp = thread(client[0], server, request)
             threadTemp.start()
 
