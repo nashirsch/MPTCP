@@ -63,11 +63,12 @@ def main(args):
 
                 currentServers.append((server, requestedServer))
             else:
+                print(request[2:9])
                 print("Error: Non-connect method on unconnected server")
-                exit
+                exit()
 
         if threading.activeCount() <= args.numworkers:
-            threadTemp = thread(client[0], server, request)
+            threadTemp = thread(client[0], server[0], request)
             threadTemp.start()
 
 
