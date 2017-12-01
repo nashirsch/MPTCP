@@ -11,7 +11,7 @@ def requestHandler(client):
 
         request = client[0].recv(1024)
 
-        if str(request)[2:9] != "CONNECT":
+        if str(request)[2:9] == "CONNECT":
             client[0].close()
             return
 
