@@ -38,8 +38,9 @@ def main(args):
     client = clientSocket.accept() #client = (connSd, (clientname, clientport))
     client[0].setblocking(1)
 
-    while True:
-
+    i = 10
+    while i > 0:
+        i -= 1
         request = str(client[0].recv(1024))
 
         print(request)
