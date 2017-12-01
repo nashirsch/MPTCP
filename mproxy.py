@@ -10,17 +10,15 @@ def requestHandler(client, server, request):
         print(request)
         server.send(request)
 
-        ret = server.recv(8192)
+        ret = server.recv(1024)
         while len(ret) > 1:
             print("recieving packet")
-
-            ret = server.recv(8192)
 
             print(len(ret))
 
             client.send(ret)
 
-            ret = server.recv(8192)
+            ret = server.recv(1024)
 
 
 def main(args):
@@ -37,7 +35,6 @@ def main(args):
 
 
     client = clientSocket.accept()
-    client[0].setblocking(1)
     client[0].settimeout(None)
 
     request = client[0].recv(1024)
@@ -70,10 +67,11 @@ def main(args):
                 t = threading.Thread(target = requestHandler, args = (client[0], server, request))
                 t.start()
 
+
         request = client[0].recv(1024)
 
-    print("closing")
     client[0].close()
+    print("closing")
 
 
 
