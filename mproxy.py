@@ -15,9 +15,9 @@ class thread(threading.Thread):
         print("running")
         self.server.send(str.encode(self.request))
 
-        while(ret == self.server.recv(1024)):
-            print(ret)
-            self.client.send(ret)
+        ret = self.server.recv(1024)
+        print(ret)
+        self.client.send(ret)
 
 
 
@@ -55,7 +55,12 @@ def main(args):
             if request[2:9] == "CONNECT":
                 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 server.connect(requestedServer)
-                server.setblocking(1)
+
+                if(args.timeout > 0):
+                    server.settimeout(args.timeout)
+                else:
+                    server.settimeout(None)
+
                 currentServers.append((server, requestedServer))
             else:
                 print("Error: Non-connect method on unconnected server")
