@@ -78,7 +78,7 @@ def main(args):
             threadTemp.start()
 
 
-
+    client[0].close()
 
 
 
