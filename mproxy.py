@@ -36,16 +36,8 @@ def main(args):
     client[0].setblocking(1)
     client[0].settimeout(None)
 
-    i = 100
-    while i > 0:
-        i -= 1
-
-        print("hanging before request receipt")
-        request = client[0].recv(1024)
-        print("after request receipt")
-
-        if(len(request) < 4):
-            continue
+    request = client[0].recv(1024)
+    while len(request) > 1:
 
         print(request)
 
@@ -77,7 +69,9 @@ def main(args):
         if threading.activeCount() <= args.numworkers:
             print("2")
             t = threading.Thread(target = requestHandler, args = (client[0], server, request))
-            t.run()
+            t.start()
+
+        request = client[0].recv(1024)
 
     print("closing")
     client[0].close()
