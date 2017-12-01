@@ -67,6 +67,7 @@ def main(args):
                 print("Error: Non-connect method on unconnected server")
                 exit()
 
+        print("1")
         if threading.activeCount() <= args.numworkers:
             threading.Thread(target = requestHandler, args = (client[0], server, request))
 
