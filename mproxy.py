@@ -17,7 +17,7 @@ def requestHandler(client, server, request):
             ret = server.recv(8192)
 
             print(len(ret))
-            
+
             client.send(ret)
 
             ret = server.recv(8192)
@@ -43,7 +43,7 @@ def main(args):
 
         print(request)
 
-        requestedServer = (str(request).split(' ')[1].split(':')[0],
+        requestedServer = (str(request).split(' ')[1].split(':')[0].replace("/", ""),
                            int(str(request).split(' ')[1].split(':')[1]))
 
         print(requestedServer)
