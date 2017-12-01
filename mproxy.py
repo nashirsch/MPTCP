@@ -67,7 +67,7 @@ def main(args):
                 exit()
 
         if threading.activeCount() <= args.numworkers:
-            threading.Thread(client[0], server, request)
+            threading.Thread(targer = requestHandler, (client[0], server, request))
 
     client[0].close()
 
