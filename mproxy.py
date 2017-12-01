@@ -10,15 +10,17 @@ def requestHandler(client, server, request):
         print(request)
         server.send(request)
 
-        while True:
+        ret = server.recv(8192)
+        while len(ret) > 1:
             print("recieving packet")
+
             ret = server.recv(8192)
+
             print(len(ret))
+            
             client.send(ret)
 
-            if len(ret) == 0:
-                print("breaking")
-                break
+            ret = server.recv(8192)
 
 
 def main(args):
