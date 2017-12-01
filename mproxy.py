@@ -25,6 +25,7 @@ def requestHandler(client):
         else:
             server.settimeout(None)
 
+        ret = server.recv(1024)
         while len(ret) > 0:
             print("recieving packet")
 
