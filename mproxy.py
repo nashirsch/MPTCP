@@ -18,15 +18,15 @@ def requestHandler(client):
         print(request)
 
         requestedServer = (str(request).split(' ')[1].split(':')[1].replace("/", ""), 80)
-        print(requestedServer)
         try:
             requestedServer[1] = str(request).split(' ')[1].split(':')[2]
         except:
             pass
 
-        print(requestedServer)
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.connect(requestedServer)
+        print("created, connected server socket")
+
 
         if(args.timeout > 0):
             server.settimeout(args.timeout)
@@ -34,6 +34,7 @@ def requestHandler(client):
             server.settimeout(None)
 
         ret = server.recv(1024)
+        print("recieved initial server information")
         while len(ret) > 0:
             print("recieving packet")
 
@@ -45,6 +46,7 @@ def requestHandler(client):
 
         client[0].close()
         server.close()
+        print("leaving handler")
 
 
 def main(args):
