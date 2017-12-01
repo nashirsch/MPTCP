@@ -15,7 +15,7 @@ class thread(threading.Thread):
         print("running")
         self.server.send(str.encode(self.request))
 
-        while(ret = self.server.recv(1024)):
+        while(ret == self.server.recv(1024)):
             print(ret)
             self.client.send(ret)
 
