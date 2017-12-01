@@ -13,7 +13,7 @@ def requestHandler(client, server, request):
         while True:
             print("recieving packet")
             ret = server.recv(8192)
-            print(ret)
+            print(len(ret))
             client.send(ret)
 
             if len(ret) == 0:
