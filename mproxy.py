@@ -17,6 +17,7 @@ def requestHandler(client):
         except:
             pass
 
+        print(requestedServer)
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.connect(requestedServer)
 
