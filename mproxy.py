@@ -71,6 +71,7 @@ def main(args):
 
     client[0].close()
     print("closing")
+    print(threading.active_count())
 
 
 
