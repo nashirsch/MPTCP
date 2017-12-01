@@ -72,7 +72,6 @@ def main(args):
 
 
     clientSocket.close()
-    print("closing")
     print(threading.active_count())
 
 
