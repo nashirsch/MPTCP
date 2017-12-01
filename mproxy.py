@@ -16,7 +16,6 @@ class thread(threading.Thread):
     def run(self):
         self.server.send(self.request)
 
-        server.settimeout(None)
         ret = self.server.recv(1024)
 
         print('1')
@@ -29,7 +28,6 @@ class thread(threading.Thread):
 
 
 def main(args):
-    print(args.timeout)
 
     currentServers = []
     print("Proxy Server's IP:Port  -> ", socket.gethostbyname(socket.gethostname()) , ":", args.port)
@@ -67,6 +65,7 @@ def main(args):
                     server.settimeout(args.timeout)
                 else:
                     server.settimeout(None)
+                    print("BLOCKING ON")
 
                 currentServers.append((server, requestedServer))
             else:
