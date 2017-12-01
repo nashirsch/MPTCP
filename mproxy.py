@@ -17,9 +17,9 @@ def requestHandler(client):
 
         print(request)
 
-        requestedServer = (str(request).split(' ')[1].split(':')[1].replace("/", ""), 80)
+        requestedServer = (str(request).split(' ')[1].replace("http://", ""), 80)
         try:
-            requestedServer[1] = str(request).split(' ')[1].split(':')[2]
+            requestedServer[1] = requestedServer[0].split(':')[1]
         except:
             pass
 
