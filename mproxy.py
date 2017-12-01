@@ -67,7 +67,7 @@ def main(args):
                 exit()
 
         if threading.activeCount() <= args.numworkers:
-            threadTemp = thread(client[0], server[0], request)
+            threadTemp = thread(client[0], server, request)
             threadTemp.start()
 
 
