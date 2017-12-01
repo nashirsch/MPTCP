@@ -43,7 +43,7 @@ def main(args):
 
         print(request)
 
-        requestedServer = (str(request).split(' ')[1].split(':')[0].replace("/", ""),
+        requestedServer = (str(request).split(' ')[1].split(':')[0].replace("/", "").replace("http://", "www."),
                            int(str(request).split(' ')[1].split(':')[1]))
 
         print(requestedServer)
