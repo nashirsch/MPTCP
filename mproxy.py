@@ -14,14 +14,15 @@ class thread(threading.Thread):
         pass
 
     def run(self):
-        print(self.server.send(self.request))
+        self.server.send(self.request)
 
-        ret = ""
-        ret = self.server.recv(8192)
+        while True:
+            ret = self.server.recv(8192)
+            print(ret)
+            self.client.send(ret)
 
-        print(ret)
-
-        self.client.send(ret)
+            if len(ret) <= 0:
+                break
 
 
 
