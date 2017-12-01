@@ -63,7 +63,7 @@ def main(args):
 
                 currentServers.append((server, requestedServer))
             else:
-                print(request[2:9])
+                print(str(request)[2:9])
                 print("Error: Non-connect method on unconnected server")
                 exit()
 
