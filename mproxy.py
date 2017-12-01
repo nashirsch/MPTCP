@@ -33,7 +33,8 @@ def main(args):
 
 
     client = clientSocket.accept()
-    client[0].setblocking(0)
+    client[0].setblocking(1)
+    client[0].settimeout(None)
 
     i = 100
     while i > 0:
@@ -61,8 +62,10 @@ def main(args):
                 server.connect(requestedServer)
 
                 if(args.timeout > 0):
+                    server.setblocking(1)
                     server.settimeout(args.timeout)
                 else:
+                    server.setblocking(1)
                     server.settimeout(None)
 
                 currentServers.append((server, requestedServer))
