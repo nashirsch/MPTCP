@@ -36,12 +36,11 @@ def main(args):
     client = clientSocket.accept()
     client[0].settimeout(None)
 
-    length = 1
-    while length > 0:
+    request = client[0].recv(1024)
+
+    while len(request) > 0:
 
         if str(request)[2:9] != "CONNECT":
-
-            request = client[0].recv(1024)
 
             requestedServer = (str(request).split(' ')[1].split(':')[1].replace("/", ""), 80)
 
