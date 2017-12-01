@@ -2,6 +2,7 @@
 import argparse
 import socket
 import threading
+import http.server
 
 
 class thread(threading.Thread):
@@ -12,8 +13,7 @@ class thread(threading.Thread):
         self.request = request
         pass
     def run(self):
-        print(self.client)
-        print(self.server)
+
         self.server.send(self.request)
 
         ret = self.server.recv(1024)
@@ -44,10 +44,10 @@ def main(args):
 
         request = client[0].recv(1024)
 
+
         print(request)
 
-        if len(request) < 4:
-            continue;
+
 
         requestedServer = (str(request).split(' ')[1].split(':')[0],
                            int(str(request).split(' ')[1].split(':')[1]))
