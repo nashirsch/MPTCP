@@ -39,8 +39,9 @@ def main(args):
     while i > 0:
         i -= 1
 
-        request = ""
+        print("hanging before request receipt")
         request = client[0].recv(1024)
+        print("after request receipt")
 
         if(len(request) < 4):
             continue
