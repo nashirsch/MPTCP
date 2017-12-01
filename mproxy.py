@@ -10,9 +10,15 @@ def requestHandler(client):
         client[0].settimeout(None)
 
         request = client[0].recv(1024)
+
+        if str(request)[2:9] != "CONNECT":
+            client[0].close()
+            return
+
         print(request)
 
         requestedServer = (str(request).split(' ')[1].split(':')[1].replace("/", ""), 80)
+        print(requestedServer)
         try:
             requestedServer[1] = str(request).split(' ')[1].split(':')[2]
         except:
@@ -33,11 +39,9 @@ def requestHandler(client):
 
             print(len(ret))
 
-            if str(request)[2:9] != "CONNECT":
+            client.send(ret)
 
-                client.send(ret)
-
-                ret = server.recv(1024)
+            ret = server.recv(1024)
 
         client[0].close()
         server.close()
