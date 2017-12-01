@@ -17,7 +17,7 @@ class thread(threading.Thread):
         print(self.server.send(self.request))
 
         ret = ""
-        ret = self.server.recv(1024)
+        ret = self.server.recv(8192)
 
         print(ret)
 
@@ -46,7 +46,7 @@ def main(args):
         i -= 1
 
         request = ""
-        request = client[0].recv(1024)
+        request = client[0].recv(8192)
 
         if(len(request) < 4):
             continue
