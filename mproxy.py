@@ -49,7 +49,7 @@ def main(args):
             continue;
 
         requestedServer = (str(request).split(' ')[1].split(':')[0],
-                           int(request.split(' ')[1].split(':')[1]))
+                           int(str(request).split(' ')[1].split(':')[1]))
         if (requestedServer not in server[1] for server in currentServers):
             if request[2:9] == "CONNECT":
                 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
