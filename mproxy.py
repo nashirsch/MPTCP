@@ -48,7 +48,7 @@ def main(args):
         if len(request) < 4:
             continue;
 
-        requestedServer = (str(request.split(' ')[1].split(':')[0]),
+        requestedServer = (str(request).split(' ')[1].split(':')[0],
                            int(request.split(' ')[1].split(':')[1]))
         if (requestedServer not in server[1] for server in currentServers):
             if request[2:9] == "CONNECT":
