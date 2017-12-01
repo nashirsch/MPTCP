@@ -49,6 +49,8 @@ def main(args):
 
         requestedServer = (str(request).split(' ')[1].split(':')[0],
                            int(str(request).split(' ')[1].split(':')[1]))
+        server = [i[0] for i in currentServers if i[1] is requestedServer]
+
         if (requestedServer not in server[1] for server in currentServers):
             if request[2:9] == "CONNECT":
                 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -63,9 +65,6 @@ def main(args):
             else:
                 print("Error: Non-connect method on unconnected server")
                 exit
-        else:
-            server = [i[0] for i in currentServers if i[1] is requestedServer]
-
 
         if threading.activeCount() <= args.numworkers:
             threadTemp = thread(client[0], server, request)
