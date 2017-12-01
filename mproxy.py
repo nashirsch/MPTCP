@@ -12,7 +12,8 @@ class thread(threading.Thread):
         self.request = request
         pass
     def run(self):
-        print("running")
+        print(this.client)
+        print(this.server)
         self.server.send(self.request)
 
         ret = self.server.recv(1024)
@@ -34,13 +35,13 @@ def main(args):
     clientSocket.listen(1)
 
 
-    client = clientSocket.accept() #client = (connSd, (clientname, clientport))
+    client = clientSocket.accept()
     client[0].setblocking(1)
 
     i = 10
     while i > 0:
         i -= 1
-        print("im back")
+
         request = client[0].recv(1024)
 
         print(request)
