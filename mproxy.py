@@ -6,7 +6,7 @@ import http.server
 
 
 def requestHandler(client, server, request):
-    
+
         server.send(request)
 
         ret = server.recv(1024)
@@ -39,12 +39,11 @@ def main(args):
     request = client[0].recv(1024)
     while len(request) > 1:
 
-        print(request)
-
         if str(request)[2:9] != "CONNECT":
 
             requestedServer = (str(request).split(' ')[1].split(':')[1].replace("/", ""), 80)
 
+            print(request)
             print(requestedServer)
 
             if (requestedServer not in serv[1] for serv in currentServers):
@@ -67,7 +66,7 @@ def main(args):
                 t.start()
 
 
-        request = client[0].recv(1024)
+            request = client[0].recv(1024)
 
     client[0].close()
     print("closing")
